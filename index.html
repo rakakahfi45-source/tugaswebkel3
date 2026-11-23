@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoneyMe - Manajemen Keuangan Pribadi Pelajar</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Marked.js for AI Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        sage: {
+                            50: '#F4F8F5',
+                            100: '#EBF1ED',
+                            200: '#D6E3DC',
+                            300: '#B2C9BC',
+                            400: '#8FAD9E',
+                            500: '#7A9A8A',
+                            600: '#5B7A6A',
+                            700: '#486255',
+                            800: '#384D43',
+                            900: '#2B3A33',
+                        },
+                        cream: {
+                            50: '#FAF8F5',
+                            100: '#F8F6F0',
+                            200: '#F1EDE4',
+                            300: '#E5DFC1',
+                            400: '#D6CBCE',
+                        },
+                        terracotta: {
+                            50: '#FDF6F5',
+                            100: '#FBF0EE',
+                            500: '#D97762',
+                            600: '#C35E4B',
+                            700: '#A44736',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar for sleek aesthetic */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F4F8F5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #B2C9BC;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7A9A8A;
+        }
+        
+        .bg-soft-cream {
+            background-color: #F8F6F0;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(214, 227, 220, 0.6);
+        }
+
+        .sage-gradient {
+            background: linear-gradient(135deg, #5B7A6A 0%, #384D43 100%);
+        }
+
+        .gold-badge {
+            background: linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%);
+        }
+    </style>
+</head>
+<body class="bg-[#FAF8F5] text-sage-900 font-sans min-h-screen flex flex-col antialiased selection:bg-sage-200">
+
+    <!-- TOP NAVBAR -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-sage-100 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            
+            <!-- Logo & Title -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-sage-600 text-white flex items-center justify-center shadow-md shadow-sage-600/20">
+                    <i class="fa-solid fa-seedling text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-tight text-sage-900 flex items-center gap-2">
+                        MoneyMe
+                        <span class="text-[10px] bg-sage-100 text-sage-700 font-bold px-2 py-0.5 rounded-full border border-sage-200 uppercase tracking-wider">Pelajar</span>
+                    </h1>
+                    <p class="text-[11px] text-sage-500 font-medium hidden sm:block">Kelola Keuangan Pribadi & Capai Impian</p>
+                </div>
+            </div>
+
+            <!-- Header Action Buttons -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button onclick="openApiKeyModal()" class="flex items-center space-x-1.5 text-xs font-semibold text-sage-700 bg-sage-50 hover:bg-sage-100 border border-sage-200 px-3 py-2 rounded-xl transition-all">
+                    <i class="fa-solid fa-key text-amber-500"></i>
+                    <span class="hidden md:inline">API Key</span>
+                </button>
+                <button onclick="openTargetModal()" class="flex items-center space-x-1.5 text-xs font-semibold text-sage-700 bg-cream-100 hover:bg-cream-200 border border-cream-300 px-3 py-2 rounded-xl transition-all">
+                    <i class="fa-solid fa-bullseye text-sage-600"></i>
+                    <span>Target Tabungan</span>
+                </button>
+                <button onclick="openTransactionModal()" class="flex items-center space-x-1.5 text-xs font-semibold text-white bg-sage-600 hover:bg-sage-700 px-3.5 py-2 rounded-xl shadow-sm hover:shadow transition-all">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden sm:inline">Tambah</span> Transaksi
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- TARGET TABUNGAN BANNER -->
+        <section class="sage-gradient text-white rounded-3xl p-6 shadow-xl relative overflow-hidden border border-sage-500/30">
+            <!-- Decorative Accent circles -->
+            <div class="absolute -right-12 -bottom-12 w-56 h-56 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="absolute right-1/3 -top-12 w-40 h-40 bg-sage-400/10 rounded-full blur-xl pointer-events-none"></div>
+
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                
+                <!-- Target Left Info -->
+                <div class="space-y-2 flex-grow">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-white/10 text-cream-100 border border-white/20 text-[11px] font-semibold px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-trophy text-amber-300"></i> Target Impian Utama
+                        </span>
+                        <span id="targetEstDays" class="text-xs text-sage-200 font-medium">Estimasi: - Hari</span>
+                    </div>
+
+                    <div class="flex items-baseline space-x-3">
+                        <h2 id="targetTitleDisplay" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Laptop Baru untuk Belajar</h2>
+                        <button onclick="openTargetModal()" class="text-xs text-sage-200 hover:text-white underline font-medium">Ubah Target</button>
+                    </div>
+
+                    <p class="text-sage-100 text-sm">
+                        Terkumpul <span id="targetCurrentDisplay" class="font-bold text-white text-base">Rp 0</span> dari 
+                        <span id="targetAmountDisplay" class="font-semibold text-sage-200">Rp 0</span>
+                    </p>
+                </div>
+
+                <!-- Target Progress & Action -->
+                <div class="w-full lg:w-96 bg-white/10 p-4 sm:p-5 rounded-2xl border border-white/15 backdrop-blur-md space-y-3">
+                    <div class="flex justify-between items-center text-xs font-semibold">
+                        <span class="text-sage-100">Kemajuan Tabungan</span>
+                        <span id="targetPercentDisplay" class="text-white font-extrabold text-sm">0%</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-sage-900/40 rounded-full h-3 p-0.5 overflow-hidden">
+                        <div id="targetProgressBar" class="bg-gradient-to-r from-emerald-300 to-cream-200 h-full rounded-full transition-all duration-700 w-0"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-[11px] text-sage-200">
+                        <span>Sisa: <strong id="targetRemainingDisplay" class="text-white font-bold">Rp 0</strong></span>
+                        <button onclick="openDepositModal()" class="bg-white text-sage-800 hover:bg-cream-100 px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm transition-all flex items-center gap-1">
+                            <i class="fa-solid fa-piggy-bank text-sage-600"></i> Setor Tabungan
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- DASHBOARD SUMMARY CARDS (4 METRICS) -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- CARD 1: TOTAL SALDO -->
+            <div class="glass-card p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-center justify-between text-sage-600 mb-2">
+                    <span class="text-xs font-semibold tracking-wide uppercase">Total Saldo Bersih</span>
+                    <div class="w-9 h-9 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                </div>
+                <div id="metricTotalBalance" class="text-xl sm:text-2xl font-extrabold text-sage-900">Rp 0</div>
+                <div class="text-[11px] text-sage-500 font-medium mt-1">Sisa uang saku & dompet</div>
+            </div>
+
+            <!-- CARD 2: PEMASUKAN BULAN INI -->
+            <div class="glass-card p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-center justify-between text-sage-600 mb-2">
+                    <span class="text-xs font-semibold tracking-wide uppercase">Pemasukan Bulan Ini</span>
+                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-arrow-down-left"></i>
+                    </div>
+                </div>
+                <div id="metricIncomeMonth" class="text-xl sm:text-2xl font-extrabold text-emerald-700">Rp 0</div>
+                <div class="text-[11px] text-emerald-600 font-medium mt-1">Total saku & beasiswa</div>
+            </div>
+
+            <!-- CARD 3: PENGELUARAN BULAN INI -->
+            <div class="glass-card p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-center justify-between text-sage-600 mb-2">
+                    <span class="text-xs font-semibold tracking-wide uppercase">Pengeluaran Bulan Ini</span>
+                    <div class="w-9 h-9 rounded-xl bg-terracotta-100 text-terracotta-600 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-arrow-up-right"></i>
+                    </div>
+                </div>
+                <div id="metricExpenseMonth" class="text-xl sm:text-2xl font-extrabold text-terracotta-600">Rp 0</div>
+                <div class="text-[11px] text-terracotta-600 font-medium mt-1">Jajan, ongkos & kebutuhan</div>
+            </div>
+
+            <!-- CARD 4: HEALTH RATIO -->
+            <div class="glass-card p-5 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200">
+                <div class="flex items-center justify-between text-sage-600 mb-2">
+                    <span class="text-xs font-semibold tracking-wide uppercase">Rasio Hemat</span>
+                    <div class="w-9 h-9 rounded-xl bg-cream-200 text-sage-800 flex items-center justify-center text-sm font-bold">
+                        <i class="fa-solid fa-heart-pulse"></i>
+                    </div>
+                </div>
+                <div id="metricHealthRatio" class="text-xl sm:text-2xl font-extrabold text-sage-900">0%</div>
+                <div id="metricHealthStatus" class="text-[11px] text-sage-600 font-semibold mt-1">Menunggu data</div>
+            </div>
+
+        </section>
+
+        <!-- MAIN LAYOUT GRID (LEFT CONTENT 7 COLS / RIGHT SIDEBAR 5 COLS) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- LEFT COLUMN (7 COLS) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- CHARTS VISUALIZATION SECTION -->
+                <div class="bg-white p-5 sm:p-6 rounded-3xl border border-sage-100 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-sage-100 pb-3">
+                        <div>
+                            <h3 class="font-bold text-sage-900 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-sage-600"></i> Visualisasi Keuangan
+                            </h3>
+                            <p class="text-xs text-sage-500">Perbandingan pemasukan, pengeluaran, dan alokasi kategori</p>
+                        </div>
+                        
+                        <!-- Toggle Chart View Buttons -->
+                        <div class="flex bg-sage-50 p-1 rounded-xl border border-sage-200 text-xs font-semibold">
+                            <button id="btnChartBar" onclick="switchChartType('bar')" class="px-3 py-1 rounded-lg bg-white text-sage-800 shadow-xs transition">Tren Bulanan</button>
+                            <button id="btnChartPie" onclick="switchChartType('pie')" class="px-3 py-1 rounded-lg text-sage-600 hover:text-sage-900 transition">Kategori Pengeluaran</button>
+                        </div>
+                    </div>
+
+                    <!-- Chart Canvas Containers -->
+                    <div class="h-64 relative w-full">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- TRANSACTION HISTORY & FILTER TABLE -->
+                <div class="bg-white p-5 sm:p-6 rounded-3xl border border-sage-100 shadow-sm space-y-4">
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-sage-100 pb-4">
+                        <div>
+                            <h3 class="font-bold text-sage-900 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-receipt text-sage-600"></i> Riwayat Transaksi
+                            </h3>
+                            <p class="text-xs text-sage-500">Daftar arus kas yang telah dicatat</p>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <button onclick="openTransactionModal()" class="text-xs bg-sage-50 hover:bg-sage-100 text-sage-700 border border-sage-200 font-semibold px-3 py-1.5 rounded-xl transition">
+                                <i class="fa-solid fa-plus text-sage-600"></i> Tambah Baru
+                            </button>
+                            <button onclick="confirmResetData()" class="text-xs bg-terracotta-50 hover:bg-terracotta-100 text-terracotta-600 font-semibold px-3 py-1.5 rounded-xl transition">
+                                <i class="fa-solid fa-trash-can"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search & Filter Control Bar -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <!-- Search input -->
+                        <div class="relative sm:col-span-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-sage-400"></i>
+                            <input type="text" id="searchInput" oninput="renderTransactions()" placeholder="Cari transaksi..." class="w-full pl-9 pr-3 py-2 bg-sage-50/50 border border-sage-200 rounded-xl text-xs text-sage-800 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                        </div>
+
+                        <!-- Type Filter -->
+                        <div>
+                            <select id="typeFilter" onchange="renderTransactions()" class="w-full bg-sage-50/50 border border-sage-200 rounded-xl px-3 py-2 text-xs text-sage-800 font-medium focus:outline-none focus:ring-2 focus:ring-sage-500">
+                                <option value="all">Semua Tipe Transaksi</option>
+                                <option value="in">💰 Pemasukan Only</option>
+                                <option value="out">🛒 Pengeluaran Only</option>
+                                <option value="save">🐖 Tabungan Only</option>
+                            </select>
+                        </div>
+
+                        <!-- Category Filter -->
+                        <div>
+                            <select id="categoryFilter" onchange="renderTransactions()" class="w-full bg-sage-50/50 border border-sage-200 rounded-xl px-3 py-2 text-xs text-sage-800 font-medium focus:outline-none focus:ring-2 focus:ring-sage-500">
+                                <option value="all">Semua Kategori</option>
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Transactions List Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-[11px] uppercase font-bold text-sage-500 border-b border-sage-100 bg-sage-50/50">
+                                    <th class="py-3 px-3 rounded-l-xl">Tanggal</th>
+                                    <th class="py-3 px-3">Kategori & Catatan</th>
+                                    <th class="py-3 px-3">Tipe</th>
+                                    <th class="py-3 px-3 text-right">Nominal</th>
+                                    <th class="py-3 px-3 text-center rounded-r-xl">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="txTableBody" class="divide-y divide-sage-100 text-xs text-sage-800">
+                                <!-- Dynamic Rows Injected Here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State Placeholder -->
+                    <div id="txEmptyState" class="hidden text-center py-8 text-sage-400 space-y-2">
+                        <i class="fa-solid fa-folder-open text-3xl text-sage-300"></i>
+                        <p class="text-xs font-medium">Tidak ada transaksi yang cocok dengan filter.</p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN (5 COLS): GEMINI AI FINANCIAL COACH & EDUCATIONAL CARD -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- GEMINI AI FINANCIAL COACH CARD -->
+                <div class="bg-gradient-to-b from-sage-900 via-sage-800 to-sage-900 text-white p-5 sm:p-6 rounded-3xl shadow-lg border border-sage-700/50 relative overflow-hidden">
+                    
+                    <!-- Top AI Header -->
+                    <div class="flex items-center justify-between border-b border-sage-700/60 pb-3 mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-2xl bg-sage-600/80 border border-sage-400/30 flex items-center justify-center text-emerald-300 shadow-inner">
+                                <i class="fa-solid fa-robot text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-sm sm:text-base text-white tracking-tight">Financial Coach AI</h3>
+                                <p class="text-[11px] text-sage-300">Powered by Gemini 2.5 Flash</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center gap-1.5 text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full font-semibold">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Online
+                        </span>
+                    </div>
+
+                    <!-- Quick Preset Prompts -->
+                    <div class="space-y-2 mb-4">
+                        <p class="text-[11px] text-sage-300 font-semibold">Pilihan Analisis Instan:</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="requestAiAnalysis('full')" class="bg-white/10 hover:bg-white/20 text-sage-100 p-2.5 rounded-xl text-left border border-white/10 transition text-xs flex items-center space-x-2">
+                                <i class="fa-solid fa-square-poll-vertical text-emerald-300"></i>
+                                <span class="line-clamp-1">📊 Evaluasi Lengkap</span>
+                            </button>
+                            <button onclick="requestAiAnalysis('savings')" class="bg-white/10 hover:bg-white/20 text-sage-100 p-2.5 rounded-xl text-left border border-white/10 transition text-xs flex items-center space-x-2">
+                                <i class="fa-solid fa-bullseye text-amber-300"></i>
+                                <span class="line-clamp-1">🎯 Strategi Target</span>
+                            </button>
+                            <button onclick="requestAiAnalysis('frugal')" class="bg-white/10 hover:bg-white/20 text-sage-100 p-2.5 rounded-xl text-left border border-white/10 transition text-xs flex items-center space-x-2">
+                                <i class="fa-solid fa-utensils text-rose-300"></i>
+                                <span class="line-clamp-1">💡 Trik Hemat Jajan</span>
+                            </button>
+                            <button onclick="requestAiAnalysis('motivation')" class="bg-white/10 hover:bg-white/20 text-sage-100 p-2.5 rounded-xl text-left border border-white/10 transition text-xs flex items-center space-x-2">
+                                <i class="fa-solid fa-fire-flame-curved text-orange-300"></i>
+                                <span class="line-clamp-1">🔥 Motivasi Pelajar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Custom Prompt Form -->
+                    <div class="flex gap-2 mb-4">
+                       <input type="text" id="aiCustomInput" placeholder="Tanyakan saran penghematan..." class="flex-grow bg-white text-sage-900 placeholder-sage-400 border border-sage-300 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-sage-400">
+                        <button onclick="requestAiAnalysis('custom')" class="bg-sage-600 hover:bg-sage-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+
+                    <!-- AI Response Area -->
+                    <div class="bg-sage-950/90 rounded-2xl p-4 border border-sage-800 min-h-[220px] max-h-[360px] overflow-y-auto space-y-3 relative text-xs">
+                        
+                        <!-- Loading State -->
+                        <div id="aiLoadingState" class="hidden py-10 text-center space-y-3 text-sage-300">
+                            <i class="fa-solid fa-circle-notch fa-spin text-3xl text-sage-400"></i>
+                            <p class="text-xs font-medium animate-pulse">Menghitung rasio & memproses analisis Gemini AI...</p>
+                        </div>
+
+                        <!-- Initial State -->
+                        <div id="aiInitialState" class="py-8 text-center text-sage-400 space-y-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-3xl text-sage-500/60"></i>
+                            <p class="text-xs">Klik salah satu tombol preset di atas untuk meminta saran spesifik dari Financial Coach AI.</p>
+                        </div>
+
+                        <!-- Rendered Output Text -->
+                        <div id="aiOutputContent" class="hidden text-sage-100 leading-relaxed space-y-2">
+                            <!-- Injected by Marked.js -->
+                        </div>
+                    </div>
+
+                    <!-- Audio TTS Action -->
+                    <div class="mt-3 flex justify-end">
+                        <button id="ttsButton" onclick="speakAiResponse()" class="hidden text-[11px] text-sage-300 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 font-medium">
+                            <i class="fa-solid fa-volume-high"></i>
+                            <span>Dengarkan Voice Coach</span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- FINANCIAL FORMULA EDUCATIONAL CARD -->
+                <div class="bg-white p-5 rounded-3xl border border-sage-100 shadow-sm space-y-3">
+                    <h4 class="font-bold text-sm text-sage-900 flex items-center gap-2">
+                        <i class="fa-solid fa-graduation-cap text-sage-600"></i> Formula Keuangan 50/30/20 Pelajar
+                    </h4>
+                    <p class="text-xs text-sage-600 leading-relaxed">
+                        Atur alokasi uang saku harian/mingguan dengan rasio seimbang:
+                    </p>
+                    
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
+                        <div class="bg-sage-50 border border-sage-200 p-2.5 rounded-2xl text-sage-800">
+                            <div class="text-base font-extrabold text-sage-700">50%</div>
+                            <div class="text-[10px] text-sage-600 font-medium">Kebutuhan (Ongkos/Buku)</div>
+                        </div>
+                        <div class="bg-cream-100 border border-cream-300 p-2.5 rounded-2xl text-sage-900">
+                            <div class="text-base font-extrabold text-amber-700">30%</div>
+                            <div class="text-[10px] text-sage-600 font-medium">Jajan & Hiburan</div>
+                        </div>
+                        <div class="bg-emerald-50 border border-emerald-200 p-2.5 rounded-2xl text-emerald-900">
+                            <div class="text-base font-extrabold text-emerald-700">20%</div>
+                            <div class="text-[10px] text-emerald-700 font-medium">Tabungan Target</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-sage-100 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-sage-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div>
+                <strong>MoneyMe</strong> &copy; 2026 - Aplikasi Manajemen Keuangan Pelajar & Pribadi.
+            </div>
+            <div class="flex items-center space-x-3 text-sage-400">
+                <span><i class="fa-solid fa-shield-halved text-sage-600"></i> LocalStorage Persistent</span>
+                <span>•</span>
+                <span><i class="fa-solid fa-brain text-sage-600"></i> Gemini AI Enabled</span>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL 1: ADD TRANSACTION MODAL -->
+    <!-- ========================================== -->
+    <div id="txModal" class="fixed inset-0 bg-sage-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-sage-100 space-y-4">
+            
+            <div class="flex justify-between items-center border-b border-sage-100 pb-3">
+                <h3 class="font-bold text-sage-900 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-sage-600"></i> Tambah Transaksi Baru
+                </h3>
+                <button onclick="closeTransactionModal()" class="text-sage-400 hover:text-sage-700 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleSaveTransaction(event)" class="space-y-4">
+                
+                <!-- Tipe Transaksi -->
+                <div>
+                    <label class="block text-xs font-semibold text-sage-700 mb-1">Jenis Transaksi</label>
+                    <select id="modalTxType" onchange="updateModalCategoryDropdown()" class="w-full bg-sage-50/60 border border-sage-200 rounded-xl px-3 py-2 text-xs font-bold text-sage-800 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                        <option value="out">🛒 Pengeluaran (Jajan / Belanja)</option>
+                        <option value="in">💰 Pemasukan (Uang Saku / Gaji)</option>
+                        <option value="save">🐖 Setor Tabungan Target</option>
+                    </select>
+                </div>
+
+                <!-- Nominal -->
+                <div>
+                    <label class="block text-xs font-semibold text-sage-700 mb-1">Nominal (Rp)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-sage-400">Rp</span>
+                        <input type="number" id="modalTxAmount" required min="100" step="100" placeholder="15000" class="w-full pl-9 bg-sage-50/60 border border-sage-200 rounded-xl px-3 py-2 text-xs font-extrabold text-sage-900 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Kategori -->
+                    <div>
+                        <label class="block text-xs font-semibold text-sage-700 mb-1">Kategori</label>
+                        <select id="modalTxCategory" class="w-full bg-sage-50/60 border border-sage-200 rounded-xl px-3 py-2 text-xs font-medium text-sage-800 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Tanggal -->
+                    <div>
+                        <label class="block text-xs font-semibold text-sage-700 mb-1">Tanggal</label>
+                        <input type="date" id="modalTxDate" required class="w-full bg-sage-50/60 border border-sage-200 rounded-xl px-3 py-2 text-xs text-sage-800 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                    </div>
+                </div>
+
+                <!-- Catatan / Nama Transaksi -->
+                <div>
+                    <label class="block text-xs font-semibold text-sage-700 mb-1">Nama / Catatan Transaksi</label>
+                    <input type="text" id="modalTxNote" required placeholder="Contoh: Es Teh + Nasi Ayam Kantin" class="w-full bg-sage-50/60 border border-sage-200 rounded-xl px-3 py-2 text-xs text-sage-800 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeTransactionModal()" class="px-4 py-2 text-xs font-semibold text-sage-600 hover:bg-sage-100 rounded-xl transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-sage-600 hover:bg-sage-700 rounded-xl shadow-md transition">Simpan Transaksi</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL 2: TARGET TABUNGAN SETTINGS -->
+    <!-- ========================================== -->
+    <div id="targetModal" class="fixed inset-0 bg-sage-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-sage-100 space-y-4">
+            
+            <div class="flex justify-between items-center border-b border-sage-100 pb-3">
+                <h3 class="font-bold text-sage-900 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-bullseye text-sage-600"></i> Pengaturan Target Tabungan
+                </h3>
+                <button onclick="closeTargetModal()" class="text-sage-400 hover:text-sage-700 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleSaveTargetGoal(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-sage-700 mb-1">Nama Target Impian</label>
+                    <input type="text" id="modalTargetTitle" required placeholder="Contoh: Laptop Baru, Sepatu Sneaker, Tiket Konser" class="w-full bg-sage-50/60 border border-sage-200 rounded-xl px-3 py-2 text-xs text-sage-800 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-sage-700 mb-1">Target Total Nominal (Rp)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-sage-400">Rp</span>
+                        <input type="number" id="modalTargetAmount" required min="5000" step="5000" placeholder="1500000" class="w-full pl-9 bg-sage-50/60 border border-sage-200 rounded-xl px-3 py-2 text-xs font-extrabold text-sage-900 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeTargetModal()" class="px-4 py-2 text-xs font-semibold text-sage-600 hover:bg-sage-100 rounded-xl transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-sage-600 hover:bg-sage-700 rounded-xl shadow-md transition">Simpan Target</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL 3: DEPOSIT TO TARGET MODAL -->
+    <!-- ========================================== -->
+    <div id="depositModal" class="fixed inset-0 bg-sage-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-sage-100 space-y-4 text-center">
+            
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-xl shadow-sm">
+                <i class="fa-solid fa-piggy-bank"></i>
+            </div>
+            
+            <div>
+                <h3 class="font-bold text-sage-900 text-base">Setor ke Tabungan Target</h3>
+                <p class="text-xs text-sage-500 mt-1">Sisihkan dari saldo bebasmu untuk mempercepat pencapaian target impian.</p>
+            </div>
+
+            <form onsubmit="handleSaveDeposit(event)" class="space-y-3 text-left">
+                <div>
+                    <label class="block text-xs font-semibold text-sage-700 mb-1">Nominal Setoran (Rp)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-sage-400">Rp</span>
+                        <input type="number" id="depositAmount" required min="1000" step="1000" placeholder="20000" class="w-full pl-9 bg-sage-50/60 border border-sage-200 rounded-xl px-3 py-2 text-xs font-extrabold text-sage-900 focus:outline-none focus:ring-2 focus:ring-sage-500">
+                    </div>
+                </div>
+
+                <div class="pt-2 flex justify-center space-x-2">
+                    <button type="button" onclick="closeDepositModal()" class="w-1/2 py-2 text-xs font-semibold text-sage-600 hover:bg-sage-100 rounded-xl transition">Batal</button>
+                    <button type="submit" class="w-1/2 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md transition">Setor Sekarang</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL 4: GEMINI API KEY SETTINGS -->
+    <!-- ========================================== -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-sage-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-sage-100 space-y-4">
+            
+            <div class="flex justify-between items-center border-b border-sage-100 pb-3">
+                <h3 class="font-bold text-sage-900 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-500"></i> Gemini API Key Config
+                </h3>
+                <button onclick="closeApiKeyModal()" class="text-sage-400 hover:text-sage-700 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs text-sage-600">
+                <p>Masukkan API Key dari Google AI Studio untuk mengaktifkan fitur analisis cerdas Financial Coach AI:</p>
+                <div>
+                    <label class="block text-xs font-semibold text-sage-700 mb-1">API Key Anda</label>
+                    <input type="password" id="modalApiKeyInput" placeholder="AIzaSy..." class="w-full bg-sage-50/60 border border-sage-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sage-500">
+                </div>
+                <p class="text-[11px] text-sage-400">API Key disimpan secara aman di browser lokal (`localStorage`) dan tidak pernah disebarkan.</p>
+            </div>
+
+            <div class="pt-2 flex justify-between items-center">
+                <button type="button" onclick="clearApiKey()" class="text-xs text-terracotta-600 font-semibold hover:underline">Hapus Key</button>
+                <div class="space-x-2">
+                    <button type="button" onclick="closeApiKeyModal()" class="px-3 py-1.5 text-xs font-semibold text-sage-600 hover:bg-sage-100 rounded-xl transition">Batal</button>
+                    <button type="button" onclick="saveApiKey()" class="px-4 py-1.5 text-xs font-bold text-white bg-sage-600 hover:bg-sage-700 rounded-xl shadow-md transition">Simpan</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MODAL 5: CUSTOM ALERT / CONFIRMATION DIALOG -->
+    <!-- ========================================== -->
+    <div id="customDialogModal" class="fixed inset-0 bg-sage-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl text-center space-y-3 border border-sage-100">
+            <div id="dialogIcon" class="w-12 h-12 rounded-2xl bg-sage-100 text-sage-700 mx-auto flex items-center justify-center text-xl shadow-xs">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+            <h4 id="dialogTitle" class="font-bold text-sage-900 text-base">Informasi</h4>
+            <p id="dialogMessage" class="text-xs text-sage-600 leading-relaxed"></p>
+            <div id="dialogButtons" class="pt-2 flex justify-center space-x-2">
+                <button onclick="closeCustomDialog()" class="w-full bg-sage-900 text-white text-xs font-bold py-2 rounded-xl hover:bg-sage-800 transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT APP ENGINE -->
+    <!-- ========================================== -->
+    <script>
+        // --- CONSTANTS & STORAGE KEYS ---
+        const KEY_TRANSACTIONS = 'moneyme_transactions_v2';
+        const KEY_TARGET = 'moneyme_target_v2';
+        const KEY_API_KEY = 'moneyme_gemini_apikey_v2';
+
+        // --- APP STATE ---
+        let transactions = [];
+        let targetGoal = {
+            title: "Laptop Baru untuk Belajar",
+            amount: 2500000
+        };
+        let userApiKey = "";
+        let currentChartType = 'bar'; // 'bar' or 'pie'
+        let chartInstance = null;
+        let lastAiMarkdownText = "";
+
+        // Categories Configuration with Icons & Colors
+        const categoryDict = {
+            // Expense Categories
+            makanan: { label: 'Makanan & Minuman', icon: 'fa-utensils', type: 'out', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+            transportasi: { label: 'Transportasi', icon: 'fa-bus', type: 'out', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+            pendidikan: { label: 'Pendidikan', icon: 'fa-graduation-cap', type: 'out', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+            belanja: { label: 'Belanja', icon: 'fa-bag-shopping', type: 'out', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+            hiburan: { label: 'Hiburan', icon: 'fa-gamepad', type: 'out', color: 'bg-rose-100 text-rose-700 border-rose-200' },
+            kesehatan: { label: 'Kesehatan', icon: 'fa-briefcase-medical', type: 'out', color: 'bg-teal-100 text-teal-700 border-teal-200' },
+            lainnya_out: { label: 'Pengeluaran Lainnya', icon: 'fa-receipt', type: 'out', color: 'bg-sage-100 text-sage-700 border-sage-200' },
+
+            // Income Categories
+            saku: { label: 'Uang Saku', icon: 'fa-hand-holding-dollar', type: 'in', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+            beasiswa: { label: 'Beasiswa', icon: 'fa-award', type: 'in', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+            hadiah: { label: 'Hadiah / Pesangon', icon: 'fa-gift', type: 'in', color: 'bg-rose-100 text-rose-700 border-rose-200' },
+            freelance: { label: 'Gaji / Freelance', icon: 'fa-laptop-code', type: 'in', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+            lainnya_in: { label: 'Pemasukan Lainnya', icon: 'fa-money-bill-wave', type: 'in', color: 'bg-sage-100 text-sage-700 border-sage-200' },
+
+            // Savings Category
+            tabungan_target: { label: 'Setoran Tabungan', icon: 'fa-piggy-bank', type: 'save', color: 'bg-emerald-200 text-emerald-800 border-emerald-300' }
+        };
+
+        // DOM Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInitialData();
+            populateCategoryDropdowns();
+            renderDashboard();
+            initChart();
+        });
+
+        // Load persisted data or seed defaults
+        function loadInitialData() {
+            const savedTx = localStorage.getItem(KEY_TRANSACTIONS);
+            const savedTarget = localStorage.getItem(KEY_TARGET);
+            const savedKey = localStorage.getItem(KEY_API_KEY);
+
+            if (savedKey) userApiKey = savedKey;
+
+            if (savedTarget) {
+                try { targetGoal = JSON.parse(savedTarget); } catch(e){}
+            }
+
+            if (savedTx) {
+                try { transactions = JSON.parse(savedTx); } catch(e){}
+            } else {
+                // Seed realistic dummy transactions for new student users
+                const today = new Date();
+                const d1 = new Date(new Date().setDate(today.getDate() - 4)).toISOString().split('T')[0];
+                const d2 = new Date(new Date().setDate(today.getDate() - 2)).toISOString().split('T')[0];
+                const d3 = today.toISOString().split('T')[0];
+
+                transactions = [
+                    { id: 'tx_1', type: 'in', amount: 300000, category: 'saku', note: 'Uang saku bulanan dari ortu', date: d1 },
+                    { id: 'tx_2', type: 'out', amount: 25000, category: 'makanan', note: 'Makan siang & es teh kantin', date: d1 },
+                    { id: 'tx_3', type: 'out', amount: 15000, category: 'transportasi', note: 'Ongkos angkot & busway', date: d2 },
+                    { id: 'tx_4', type: 'save', amount: 50000, category: 'tabungan_target', note: 'Setor target laptop', date: d2 },
+                    { id: 'tx_5', type: 'out', amount: 45000, category: 'pendidikan', note: 'Beli modul cetak & alat tulis', date: d3 },
+                    { id: 'tx_6', type: 'save', amount: 30000, category: 'tabungan_target', note: 'Nabung dari sisa saku', date: d3 }
+                ];
+                saveTransactions();
+            }
+        }
+
+        function saveTransactions() {
+            localStorage.setItem(KEY_TRANSACTIONS, JSON.stringify(transactions));
+        }
+
+        function saveTargetGoal() {
+            localStorage.setItem(KEY_TARGET, JSON.stringify(targetGoal));
+        }
+
+        // Populate Category Dropdowns dynamically
+        function populateCategoryDropdowns() {
+            // Populate Modal Category Select
+            updateModalCategoryDropdown();
+
+            // Populate Category Filter Select
+            const catFilter = document.getElementById('categoryFilter');
+            catFilter.innerHTML = '<option value="all">Semua Kategori</option>';
+            
+            Object.keys(categoryDict).forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = categoryDict[key].label;
+                catFilter.appendChild(opt);
+            });
+        }
+
+        function updateModalCategoryDropdown() {
+            const type = document.getElementById('modalTxType').value;
+            const select = document.getElementById('modalTxCategory');
+            select.innerHTML = '';
+
+            Object.keys(categoryDict).forEach(key => {
+                const item = categoryDict[key];
+                if (item.type === type) {
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.textContent = item.label;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
+        // Calculate Totals & Render Entire Dashboard
+        function renderDashboard() {
+            let totalIncome = 0;
+            let totalExpense = 0;
+            let totalSaved = 0;
+
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+
+            let monthlyIncome = 0;
+            let monthlyExpense = 0;
+
+            transactions.forEach(t => {
+                const amt = Number(t.amount) || 0;
+                const txDate = new Date(t.date);
+
+                if (t.type === 'in') {
+                    totalIncome += amt;
+                    if (txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) {
+                        monthlyIncome += amt;
+                    }
+                } else if (t.type === 'out') {
+                    totalExpense += amt;
+                    if (txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear) {
+                        monthlyExpense += amt;
+                    }
+                } else if (t.type === 'save') {
+                    totalSaved += amt;
+                }
+            });
+
+            // Total Saldo Bersih Bebas = Income - Expense - Saved
+            const totalBalance = totalIncome - totalExpense - totalSaved;
+
+            // Render Metrics
+            document.getElementById('metricTotalBalance').textContent = formatIDR(totalBalance);
+            document.getElementById('metricIncomeMonth').textContent = formatIDR(monthlyIncome);
+            document.getElementById('metricExpenseMonth').textContent = formatIDR(monthlyExpense);
+
+            // Financial Health Ratio (Expense / Income)
+            const healthRatio = monthlyIncome > 0 ? Math.round((monthlyExpense / monthlyIncome) * 100) : 0;
+            document.getElementById('metricHealthRatio').textContent = healthRatio + '%';
+
+            const statusEl = document.getElementById('metricHealthStatus');
+            if (monthlyIncome === 0) {
+                statusEl.textContent = "Belum ada pemasukan";
+                statusEl.className = "text-[11px] text-sage-500 font-semibold mt-1";
+            } else if (healthRatio <= 50) {
+                statusEl.textContent = "🌟 Sangat Hemat (≤50%)";
+                statusEl.className = "text-[11px] text-emerald-600 font-semibold mt-1";
+            } else if (healthRatio <= 80) {
+                statusEl.textContent = "⚖️ Waspada Jajan (51-80%)";
+                statusEl.className = "text-[11px] text-amber-600 font-semibold mt-1";
+            } else {
+                statusEl.textContent = "⚠️ Bahaya Boros (>80%)";
+                statusEl.className = "text-[11px] text-terracotta-600 font-semibold mt-1";
+            }
+
+            // Render Target Impian Banner
+            document.getElementById('targetTitleDisplay').textContent = targetGoal.title;
+            document.getElementById('targetAmountDisplay').textContent = formatIDR(targetGoal.amount);
+            document.getElementById('targetCurrentDisplay').textContent = formatIDR(totalSaved);
+
+            const progressPercent = Math.min(100, Math.round((totalSaved / targetGoal.amount) * 100));
+            document.getElementById('targetPercentDisplay').textContent = progressPercent + '%';
+            document.getElementById('targetProgressBar').style.width = progressPercent + '%';
+
+            const remaining = Math.max(0, targetGoal.amount - totalSaved);
+            document.getElementById('targetRemainingDisplay').textContent = formatIDR(remaining);
+
+            // Est Days
+            const avgDailySavings = calculateAvgDailySavings();
+            const estDaysEl = document.getElementById('targetEstDays');
+            if (remaining === 0) {
+                estDaysEl.textContent = "🎉 Target Impian Tercapai!";
+            } else if (avgDailySavings > 0) {
+                const days = Math.ceil(remaining / avgDailySavings);
+                estDaysEl.textContent = `Estimasi: ~${days} hari (Nabung ${formatIDR(avgDailySavings)}/hari)`;
+            } else {
+                estDaysEl.textContent = "Estimasi: Belum ada setoran";
+            }
+
+            // Render Transactions Table & Update Chart
+            renderTransactions();
+            updateChart();
+        }
+
+        function calculateAvgDailySavings() {
+            const saveTxs = transactions.filter(t => t.type === 'save');
+            if (saveTxs.length === 0) return 0;
+            const total = saveTxs.reduce((sum, t) => sum + Number(t.amount), 0);
+            return total / Math.max(1, saveTxs.length);
+        }
+
+        // Render Filtered Transactions Table
+        function renderTransactions() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const typeF = document.getElementById('typeFilter').value;
+            const catF = document.getElementById('categoryFilter').value;
+
+            const tbody = document.getElementById('txTableBody');
+            const emptyState = document.getElementById('txEmptyState');
+
+            tbody.innerHTML = '';
+
+            let filtered = transactions.filter(t => {
+                const matchSearch = (t.note || '').toLowerCase().includes(search);
+                const matchType = typeF === 'all' || t.type === typeF;
+                const matchCat = catF === 'all' || t.category === catF;
+                return matchSearch && matchType && matchCat;
+            });
+
+            // Sort newest date first
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-sage-50/70 transition-colors border-b border-sage-100/80";
+
+                const catInfo = categoryDict[t.category] || { label: t.category, icon: 'fa-tag', color: 'bg-sage-100 text-sage-700' };
+
+                let typeBadge = '';
+                let amountClass = '';
+                let amountPrefix = '';
+
+                if (t.type === 'in') {
+                    typeBadge = `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-lg text-[10px] font-bold">Pemasukan</span>`;
+                    amountClass = 'text-emerald-700 font-extrabold';
+                    amountPrefix = '+ ';
+                } else if (t.type === 'out') {
+                    typeBadge = `<span class="bg-terracotta-50 text-terracotta-600 border border-terracotta-100 px-2 py-0.5 rounded-lg text-[10px] font-bold">Pengeluaran</span>`;
+                    amountClass = 'text-terracotta-600 font-extrabold';
+                    amountPrefix = '- ';
+                } else {
+                    typeBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-lg text-[10px] font-bold">Tabungan</span>`;
+                    amountClass = 'text-sage-800 font-extrabold';
+                    amountPrefix = '🐖 ';
+                }
+
+                tr.innerHTML = `
+                    <td class="py-3 px-3 text-sage-500 font-medium whitespace-nowrap">${formatDate(t.date)}</td>
+                    <td class="py-3 px-3">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-7 h-7 rounded-lg ${catInfo.color} flex items-center justify-center text-xs shadow-2xs">
+                                <i class="fa-solid ${catInfo.icon}"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-sage-900">${catInfo.label}</div>
+                                <div class="text-[11px] text-sage-500 line-clamp-1">${escapeHtml(t.note)}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-3 whitespace-nowrap">${typeBadge}</td>
+                    <td class="py-3 px-3 text-right whitespace-nowrap ${amountClass}">${amountPrefix}${formatIDR(t.amount)}</td>
+                    <td class="py-3 px-3 text-center whitespace-nowrap">
+                        <button onclick="deleteTx('${t.id}')" class="text-sage-400 hover:text-terracotta-600 p-1.5 transition" title="Hapus">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Delete Single Transaction
+        function deleteTx(id) {
+            transactions = transactions.filter(t => t.id !== id);
+            saveTransactions();
+            renderDashboard();
+        }
+
+        // Confirm Clear All Data
+        function confirmResetData() {
+            showCustomDialog(
+                'Konfirmasi Reset Data',
+                'Apakah Anda yakin ingin menghapus seluruh catatan transaksi dan target? Data akan dikembalikan ke kondisi awal.',
+                true,
+                () => {
+                    localStorage.removeItem(KEY_TRANSACTIONS);
+                    localStorage.removeItem(KEY_TARGET);
+                    loadInitialData();
+                    renderDashboard();
+                }
+            );
+        }
+
+        // --- CHART VISUALIZATION ENGINE ---
+        function initChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Plus Jakarta Sans', size: 11 } } }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } } },
+                        y: { ticks: { font: { family: 'Plus Jakarta Sans', size: 10 }, callback: v => 'Rp ' + (v/1000) + 'k' } }
+                    }
+                }
+            });
+            updateChart();
+        }
+
+        function switchChartType(type) {
+            currentChartType = type;
+            const btnBar = document.getElementById('btnChartBar');
+            const btnPie = document.getElementById('btnChartPie');
+
+            if (type === 'bar') {
+                btnBar.className = "px-3 py-1 rounded-lg bg-white text-sage-800 shadow-xs transition";
+                btnPie.className = "px-3 py-1 rounded-lg text-sage-600 hover:text-sage-900 transition";
+            } else {
+                btnPie.className = "px-3 py-1 rounded-lg bg-white text-sage-800 shadow-xs transition";
+                btnBar.className = "px-3 py-1 rounded-lg text-sage-600 hover:text-sage-900 transition";
+            }
+
+            updateChart();
+        }
+
+        function updateChart() {
+            if (!chartInstance) return;
+
+            if (currentChartType === 'bar') {
+                // Monthly Income vs Expense Bar Chart
+                const dateMap = {};
+                const sorted = [...transactions].sort((a,b) => new Date(a.date) - new Date(b.date));
+
+                sorted.forEach(t => {
+                    const d = t.date;
+                    if (!dateMap[d]) dateMap[d] = { in: 0, out: 0, save: 0 };
+                    dateMap[d][t.type] += Number(t.amount);
+                });
+
+                const labels = Object.keys(dateMap).slice(-7); // Last 7 active dates
+                
+                chartInstance.config.type = 'bar';
+                chartInstance.data = {
+                    labels: labels.map(d => formatDateShort(d)),
+                    datasets: [
+                        {
+                            label: 'Pemasukan (Rp)',
+                            data: labels.map(l => dateMap[l].in),
+                            backgroundColor: '#7A9A8A',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Pengeluaran (Rp)',
+                            data: labels.map(l => dateMap[l].out),
+                            backgroundColor: '#D97762',
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Tabungan (Rp)',
+                            data: labels.map(l => dateMap[l].save),
+                            backgroundColor: '#2B3A33',
+                            borderRadius: 6
+                        }
+                    ]
+                };
+                chartInstance.options.scales.x.display = true;
+                chartInstance.options.scales.y.display = true;
+            } else {
+                // Category Breakdown Doughnut Chart
+                const catTotals = {};
+                transactions.filter(t => t.type === 'out').forEach(t => {
+                    const catLabel = categoryDict[t.category]?.label || t.category;
+                    catTotals[catLabel] = (catTotals[catLabel] || 0) + Number(t.amount);
+                });
+
+                const labels = Object.keys(catTotals);
+                const data = Object.values(catTotals);
+
+                chartInstance.config.type = 'doughnut';
+                chartInstance.data = {
+                    labels: labels.length ? labels : ['Belum ada pengeluaran'],
+                    datasets: [{
+                        data: data.length ? data : [1],
+                        backgroundColor: ['#5B7A6A', '#D97762', '#8FAD9E', '#E6DFD1', '#7A9A8A', '#486255', '#C35E4B']
+                    }]
+                };
+                chartInstance.options.scales.x.display = false;
+                chartInstance.options.scales.y.display = false;
+            }
+
+            chartInstance.update();
+        }
+
+
+        // ==========================================
+        // GEMINI AI INTEGRATION ENGINE
+        // ==========================================
+
+        async function requestAiAnalysis(mode) {
+            const loadingState = document.getElementById('aiLoadingState');
+            const initialState = document.getElementById('aiInitialState');
+            const outputContent = document.getElementById('aiOutputContent');
+            const ttsButton = document.getElementById('ttsButton');
+
+            initialState.classList.add('hidden');
+            outputContent.classList.add('hidden');
+            ttsButton.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+
+            // Calculate context stats
+            let totalIncome = 0;
+            let totalExpense = 0;
+            let totalSaved = 0;
+            transactions.forEach(t => {
+                const amt = Number(t.amount) || 0;
+                if (t.type === 'in') totalIncome += amt;
+                else if (t.type === 'out') totalExpense += amt;
+                else if (t.type === 'save') totalSaved += amt;
+            });
+            const balance = totalIncome - totalExpense - totalSaved;
+            const healthRatio = totalIncome > 0 ? Math.round((totalExpense / totalIncome) * 100) : 0;
+            const remainingTarget = Math.max(0, targetGoal.amount - totalSaved);
+
+            let promptQuery = "";
+            const customText = document.getElementById('aiCustomInput').value.trim();
+
+            if (mode === 'custom' && customText) {
+                promptQuery = `Pertanyaan siswa: "${customText}"`;
+            } else if (mode === 'savings') {
+                promptQuery = `Fokus pada strategi percepatan target tabungan "${targetGoal.title}" (Target: ${formatIDR(targetGoal.amount)}, Terkumpul: ${formatIDR(totalSaved)}). Berikan 3 langkah konkret menabung bagi siswa.`;
+            } else if (mode === 'frugal') {
+                promptQuery = `Fokus pada tips hemat jajan dan transportasi harian sekolah. Total pengeluaran saat ini: ${formatIDR(totalExpense)}. Berikan 3 ide hemat jajan kantin.`;
+            } else if (mode === 'motivation') {
+                promptQuery = `Berikan dorongan motivasi konsistensi menabung dan apresiasi pengelolaan uang saku siswa agar tidak boros.`;
+            } else {
+                promptQuery = `Berikan evaluasi kesehatan finansial lengkap (skor 1-100), ulasan rasio pengeluaran vs pemasukan, dan rekomendasi perbaikan untuk besok.`;
+            }
+
+            const systemPrompt = `
+            Kamu adalah "Financial Coach MoneyMe", seorang asisten keuangan pribadi khusus pelajar dan anak muda yang bijak, ramah, dan suportif.
+            
+            Gunakan gaya bahasa Indonesia yang modern, hangat, dan komunikatif (sapa dengan "Hai Sobat MoneyMe!").
+            Gunakan format Markdown (bold, bullet points, emoji) agar tampilan enak dibaca.
+
+            DATA KEUANGAN SAAT INI:
+            - Target Impian: ${targetGoal.title} (Target: ${formatIDR(targetGoal.amount)})
+            - Total Pemasukan/Uang Saku: ${formatIDR(totalIncome)}
+            - Total Pengeluaran: ${formatIDR(totalExpense)}
+            - Total Tabungan Target: ${formatIDR(totalSaved)} (Sisa: ${formatIDR(remainingTarget)})
+            - Saldo Dompet Bebas: ${formatIDR(balance)}
+            - Rasio Pengeluaran vs Pemasukan: ${healthRatio}%.
+
+            Aturan Jawaban:
+            1. Jawaban harus padat, inspiratif, dan praktis (maksimal 3 paragraf).
+            2. Sertakan tips relevan anak sekolah/kuliah (seperti bekal air, kantin, ongkos, promo).
+            `;
+
+            try {
+                // Primary endpoint model: gemini-3-flash-preview or gemini-2.5-flash
+                const apiKey = userApiKey || "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: promptQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+
+                const result = await response.json();
+                const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (rawText) {
+                    lastAiMarkdownText = rawText;
+                    outputContent.innerHTML = marked.parse(rawText);
+                    loadingState.classList.add('hidden');
+                    outputContent.classList.remove('hidden');
+                    ttsButton.classList.remove('hidden');
+                    document.getElementById('aiCustomInput').value = '';
+                } else {
+                    throw new Error("Respon AI kosong");
+                }
+
+            } catch (err) {
+                console.warn("Gemini API Fallback triggered:", err);
+                loadingState.classList.add('hidden');
+
+                // Fallback Generator
+                const fallback = generateSmartFallbackAdvice(healthRatio, totalSaved, targetGoal);
+                lastAiMarkdownText = fallback.raw;
+                outputContent.innerHTML = marked.parse(fallback.md);
+                outputContent.classList.remove('hidden');
+                ttsButton.classList.remove('hidden');
+            }
+        }
+
+        function generateSmartFallbackAdvice(healthRatio, totalSaved, target) {
+            let md = "";
+            let raw = "";
+
+            if (healthRatio <= 60) {
+                md = `### 🌟 Status Finansial: Sangat Baik! (Skor: 88/100)\n\n` +
+                     `Hebat banget! Pengeluaranmu terjangkau di **${healthRatio}%** dari uang saku. Kamu berada di jalur yang benar untuk mencapai **${target.title}**.\n\n` +
+                     `**💡 Tips Coach:**\n` +
+                     `- Sisihkan Rp 5.000 lagi tiap kali dapat saku.\n` +
+                     `- Bawa tumbler minum sendiri untuk menghemat jajan kantin!`;
+            } else {
+                md = `### ⚠️ Status Finansial: Perlu Rem Jajan! (Skor: 62/100)\n\n` +
+                     `Rasio pengeluaranmu mencapai **${healthRatio}%**. Sebaiknya kurangi jajan non-esensial agar saldo tabungan **${target.title}** cepat bertambah.\n\n` +
+                     `**💡 Trik Hemat:**\n` +
+                     `- Terapkan aturan "Tunda 24 Jam" sebelum beli barang keinginan.\n` +
+                     `- Setor tabungan di awal begitu terima uang saku!`;
+            }
+            raw = md.replace(/[*#]/g, '');
+            return { md, raw };
+        }
+
+        function speakAiResponse() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const cleanText = lastAiMarkdownText.replace(/[*#_]/g, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'id-ID';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showCustomDialog('Informasi', 'Browser Anda tidak mendukung Text-to-Speech.');
+            }
+        }
+
+
+        // ==========================================
+        // HANDLERS FOR MODALS & FORMS
+        // ==========================================
+
+        function openTransactionModal() {
+            document.getElementById('modalTxDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('modalTxAmount').value = '';
+            document.getElementById('modalTxNote').value = '';
+            updateModalCategoryDropdown();
+            document.getElementById('txModal').classList.remove('hidden');
+        }
+
+        function closeTransactionModal() {
+            document.getElementById('txModal').classList.add('hidden');
+        }
+
+        function handleSaveTransaction(e) {
+            e.preventDefault();
+            const type = document.getElementById('modalTxType').value;
+            const amount = parseFloat(document.getElementById('modalTxAmount').value);
+            const category = document.getElementById('modalTxCategory').value;
+            const date = document.getElementById('modalTxDate').value;
+            const note = document.getElementById('modalTxNote').value.trim() || 'Tanpa Catatan';
+
+            if (isNaN(amount) || amount <= 0) {
+                showCustomDialog('Peringatan', 'Masukkan nominal yang valid.');
+                return;
+            }
+
+            const newTx = {
+                id: 'tx_' + Date.now(),
+                type,
+                amount,
+                category,
+                date,
+                note
+            };
+
+            transactions.unshift(newTx);
+            saveTransactions();
+            renderDashboard();
+            closeTransactionModal();
+
+            if (type === 'save') {
+                checkGoalAchieved();
+            }
+        }
+
+        function openTargetModal() {
+            document.getElementById('modalTargetTitle').value = targetGoal.title;
+            document.getElementById('modalTargetAmount').value = targetGoal.amount;
+            document.getElementById('targetModal').classList.remove('hidden');
+        }
+
+        function closeTargetModal() {
+            document.getElementById('targetModal').classList.add('hidden');
+        }
+
+        function handleSaveTargetGoal(e) {
+            e.preventDefault();
+            const title = document.getElementById('modalTargetTitle').value.trim();
+            const amount = parseFloat(document.getElementById('modalTargetAmount').value);
+
+            if (title && !isNaN(amount) && amount > 0) {
+                targetGoal.title = title;
+                targetGoal.amount = amount;
+                saveTargetGoal();
+                renderDashboard();
+                closeTargetModal();
+            }
+        }
+
+        function openDepositModal() {
+            document.getElementById('depositAmount').value = '';
+            document.getElementById('depositModal').classList.remove('hidden');
+        }
+
+        function closeDepositModal() {
+            document.getElementById('depositModal').classList.add('hidden');
+        }
+
+        function handleSaveDeposit(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+
+            if (!isNaN(amount) && amount > 0) {
+                const today = new Date().toISOString().split('T')[0];
+                const depositTx = {
+                    id: 'tx_' + Date.now(),
+                    type: 'save',
+                    amount,
+                    category: 'tabungan_target',
+                    date: today,
+                    note: `Setoran langsung ke target: ${targetGoal.title}`
+                };
+                transactions.unshift(depositTx);
+                saveTransactions();
+                renderDashboard();
+                closeDepositModal();
+                checkGoalAchieved();
+            }
+        }
+
+        function checkGoalAchieved() {
+            const totalSaved = transactions.filter(t => t.type === 'save').reduce((sum, t) => sum + Number(t.amount), 0);
+            if (totalSaved >= targetGoal.amount) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                showCustomDialog(
+                    '🎉 SELAMAT!',
+                    `Target impian Anda "${targetGoal.title}" sebesar ${formatIDR(targetGoal.amount)} TELAH TERCAPAI! Waktunya mewujudkan impianmu!`
+                );
+            }
+        }
+
+        function openApiKeyModal() {
+            document.getElementById('modalApiKeyInput').value = userApiKey;
+            document.getElementById('apiKeyModal').classList.remove('hidden');
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('apiKeyModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('modalApiKeyInput').value.trim();
+            userApiKey = key;
+            if (key) {
+                localStorage.setItem(KEY_API_KEY, key);
+                showCustomDialog('Berhasil', 'Gemini API Key tersimpan secara lokal.');
+            } else {
+                localStorage.removeItem(KEY_API_KEY);
+                showCustomDialog('Informasi', 'API Key dikosongkan. Menggunakan runtime default.');
+            }
+            closeApiKeyModal();
+        }
+
+        function clearApiKey() {
+            userApiKey = "";
+            localStorage.removeItem(KEY_API_KEY);
+            document.getElementById('modalApiKeyInput').value = "";
+            showCustomDialog('Informasi', 'API Key telah dihapus.');
+            closeApiKeyModal();
+        }
+
+        // Custom Dialog Modal Handler
+        function showCustomDialog(title, message, isConfirm = false, onConfirm = null) {
+            document.getElementById('dialogTitle').textContent = title;
+            document.getElementById('dialogMessage').textContent = message;
+
+            const btnContainer = document.getElementById('dialogButtons');
+            if (isConfirm) {
+                btnContainer.innerHTML = `
+                    <button onclick="closeCustomDialog()" class="w-1/2 bg-sage-100 text-sage-700 text-xs font-semibold py-2 rounded-xl hover:bg-sage-200 transition">Batal</button>
+                    <button id="dialogConfirmBtn" class="w-1/2 bg-terracotta-600 text-white text-xs font-bold py-2 rounded-xl hover:bg-terracotta-700 transition">Ya, Lanjutkan</button>
+                `;
+                document.getElementById('dialogConfirmBtn').onclick = () => {
+                    closeCustomDialog();
+                    if (onConfirm) onConfirm();
+                };
+            } else {
+                btnContainer.innerHTML = `
+                    <button onclick="closeCustomDialog()" class="w-full bg-sage-900 text-white text-xs font-bold py-2 rounded-xl hover:bg-sage-800 transition">OK, Mengerti</button>
+                `;
+            }
+
+            document.getElementById('customDialogModal').classList.remove('hidden');
+        }
+
+        function closeCustomDialog() {
+            document.getElementById('customDialogModal').classList.add('hidden');
+        }
+
+        // Utilities
+        function formatIDR(val) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                maximumFractionDigits: 0
+            }).format(val);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const opts = { day: 'numeric', month: 'short', year: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('id-ID', opts);
+        }
+
+        function formatDateShort(dateStr) {
+            if (!dateStr) return '';
+            const p = dateStr.split('-');
+            return p.length === 3 ? `${p[2]}/${p[1]}` : dateStr;
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+    </script>
+</body>
+</html>
